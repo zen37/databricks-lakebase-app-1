@@ -10,7 +10,6 @@
   <style>
     :root {
       --ink:      #0B1220;
-      --ink-soft: #47506180;
       --muted:    #6B7688;
       --paper:    #F5F6F8;
       --surface:  #FFFFFF;
@@ -39,7 +38,6 @@
 
     .wrap { max-width: 680px; margin: 0 auto; }
 
-    /* ---- Header ---- */
     .eyebrow {
       font-family: "Space Mono", monospace;
       font-size: 11px;
@@ -59,10 +57,7 @@
       box-shadow: 0 0 0 3px rgba(14,159,110,.15);
       animation: pulse 2.4s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .4; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
     h1 {
       font-family: "Space Grotesk", sans-serif;
       font-weight: 700;
@@ -70,24 +65,15 @@
       letter-spacing: -.02em;
       margin: 0 0 8px;
     }
-    .lede {
-      color: var(--muted);
-      font-size: 14px;
-      max-width: 46ch;
-      margin: 0 0 32px;
-    }
+    .lede { color: var(--muted); font-size: 14px; max-width: 46ch; margin: 0 0 32px; }
 
-    /* ---- Add card ---- */
     .card {
       background: var(--surface);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
-    .add {
-      padding: 20px;
-      margin-bottom: 14px;
-    }
+    .add { padding: 20px; margin-bottom: 14px; }
     .add label {
       display: block;
       font-family: "Space Mono", monospace;
@@ -97,10 +83,7 @@
       color: var(--muted);
       margin-bottom: 10px;
     }
-    .field {
-      display: flex;
-      gap: 10px;
-    }
+    .field { display: flex; gap: 10px; }
     input[type="text"] {
       flex: 1;
       font-family: "Space Mono", monospace;
@@ -138,7 +121,6 @@
     button:active { transform: translateY(1px); }
     button:focus-visible { outline: 3px solid var(--accent-wash); outline-offset: 2px; }
 
-    /* ---- Result banner ---- */
     #result {
       font-family: "Space Mono", monospace;
       font-size: 13.5px;
@@ -155,13 +137,12 @@
     #result.err { background: #FDECEE; color: #A61B2B; border: 1px solid #F6CDD2; }
     #result.pending { background: var(--accent-wash); color: var(--accent-ink); border: 1px solid #D9DEFB; }
 
-    /* ---- Watchlist board ---- */
     .board { overflow: hidden; }
     .board-head {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
-      padding: 16px 20px 12px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--line-soft);
     }
     .board-head h2 {
@@ -170,11 +151,34 @@
       font-weight: 600;
       margin: 0;
     }
-    .count {
+    .head-right { display: flex; align-items: center; gap: 12px; }
+    .count { font-family: "Space Mono", monospace; font-size: 12px; color: var(--muted); }
+
+    .clear {
       font-family: "Space Mono", monospace;
-      font-size: 12px;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 400;
       color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 12px;
+      transition: color .12s, background .12s, border-color .12s;
     }
+    .clear:hover { color: var(--neg); border-color: #F6CDD2; background: #FDECEE; }
+    .clear.armed {
+      color: #fff;
+      background: var(--neg);
+      border-color: var(--neg);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .clear:focus-visible { outline: 3px solid #F6CDD2; outline-offset: 2px; }
+    .clear:disabled { opacity: .55; cursor: default; }
 
     table { width: 100%; border-collapse: collapse; }
     thead th {
@@ -188,6 +192,7 @@
       padding: 12px 20px;
     }
     thead th.num { text-align: right; }
+    thead th.act { width: 1%; }
 
     tbody tr {
       border-top: 1px solid var(--line-soft);
@@ -207,11 +212,7 @@
     tbody tr:hover { background: #FAFBFD; }
     tbody tr:hover::before { transform: scaleY(1); }
 
-    tbody td {
-      padding: 15px 20px;
-      font-size: 14px;
-      vertical-align: middle;
-    }
+    tbody td { padding: 15px 20px; font-size: 14px; vertical-align: middle; }
     .sym {
       font-family: "Space Grotesk", sans-serif;
       font-weight: 700;
@@ -241,12 +242,35 @@
       white-space: nowrap;
     }
 
-    /* ---- Empty state ---- */
-    .empty {
-      padding: 44px 20px;
-      text-align: center;
+    td.act { text-align: right; width: 1%; white-space: nowrap; padding-left: 8px; }
+    .del {
+      font-family: "Space Mono", monospace;
+      font-size: 13px;
+      font-weight: 400;
       color: var(--muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 5px 9px;
+      min-width: 32px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color .12s, background .12s, border-color .12s;
     }
+    .del:hover { color: var(--neg); background: #FDECEE; }
+    .del.armed {
+      color: #fff;
+      background: var(--neg);
+      border-color: var(--neg);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 5px 12px;
+    }
+    .del:focus-visible { outline: 3px solid #F6CDD2; outline-offset: 1px; }
+    .del:disabled { opacity: .55; cursor: default; }
+
+    .empty { padding: 44px 20px; text-align: center; color: var(--muted); }
     .empty .mark {
       font-family: "Space Mono", monospace;
       font-size: 22px;
@@ -256,18 +280,18 @@
     }
     .empty p { margin: 0; font-size: 13.5px; }
 
-    /* ---- Responsive: collapse table to quote cards ---- */
     @media (max-width: 520px) {
       body { padding-top: 32px; }
       h1 { font-size: 25px; }
       .field { flex-direction: column; }
-      button { width: 100%; }
+      .add button { width: 100%; }
       thead { display: none; }
-      tbody tr { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 14px 18px; }
+      tbody tr { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; padding: 14px 18px; align-items: center; }
       tbody tr::before { display: none; }
       tbody td { padding: 0; border: none; }
       td.sym-cell { grid-column: 1; grid-row: 1; }
-      td.price { grid-column: 2; grid-row: 1; align-self: center; }
+      td.price { grid-column: 2; grid-row: 1; }
+      td.act { grid-column: 3; grid-row: 1; }
       td.email { grid-column: 1 / -1; grid-row: 2; }
       td.updated { grid-column: 1 / -1; grid-row: 3; text-align: left; }
     }
@@ -296,7 +320,10 @@
     <section class="card board">
       <div class="board-head">
         <h2>Your tickers</h2>
-        <span class="count" id="count">—</span>
+        <div class="head-right">
+          <span class="count" id="count">&mdash;</span>
+          <button type="button" id="clear-all" class="clear" hidden>Clear all</button>
+        </div>
       </div>
       <table id="watchlist-table">
         <thead>
@@ -305,12 +332,13 @@
             <th>Email</th>
             <th class="num">Latest price</th>
             <th class="num">Updated</th>
+            <th class="act"></th>
           </tr>
         </thead>
         <tbody id="watchlist-body"></tbody>
       </table>
       <div class="empty" id="empty" hidden>
-        <div class="mark">— · —</div>
+        <div class="mark">&mdash; &middot; &mdash;</div>
         <p>No tickers yet. Add one above to start tracking.</p>
       </div>
     </section>
@@ -322,11 +350,26 @@
     const watchlistBody = document.getElementById("watchlist-body");
     const emptyEl = document.getElementById("empty");
     const countEl = document.getElementById("count");
+    const clearBtn = document.getElementById("clear-all");
 
     function setResult(text, kind) {
       resultEl.textContent = text;
       resultEl.className = "show " + (kind || "");
     }
+
+    function disarmRows() {
+      watchlistBody.querySelectorAll(".del.armed").forEach((b) => {
+        b.classList.remove("armed");
+        b.textContent = "\u2715";
+      });
+    }
+    function disarmClear() {
+      if (clearBtn.classList.contains("armed")) {
+        clearBtn.classList.remove("armed");
+        clearBtn.textContent = "Clear all";
+      }
+    }
+    function disarmAll() { disarmRows(); disarmClear(); }
 
     async function loadWatchlist() {
       try {
@@ -342,30 +385,32 @@
           const price = row.latest_price !== null && row.latest_price !== undefined
             ? Number(row.latest_price).toFixed(2)
             : "-";
-          const priceCell = price === "-"
-            ? "-"
-            : `<span class="cur">$</span>${price}`;
+          const priceCell = price === "-" ? "-" : '<span class="cur">$</span>' + price;
           const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
           tr.innerHTML =
-            `<td class="sym-cell"><span class="sym">${row.symbol}</span></td>` +
-            `<td class="email">${row.email || "-"}</td>` +
-            `<td class="price">${priceCell}</td>` +
-            `<td class="updated">${updated}</td>`;
+            '<td class="sym-cell"><span class="sym">' + row.symbol + '</span></td>' +
+            '<td class="email">' + (row.email || "-") + '</td>' +
+            '<td class="price">' + priceCell + '</td>' +
+            '<td class="updated">' + updated + '</td>' +
+            '<td class="act"><button type="button" class="del" data-symbol="' + row.symbol +
+            '" aria-label="Remove ' + row.symbol + ' from watchlist">\u2715</button></td>';
           watchlistBody.appendChild(tr);
         });
         const n = data.length;
         countEl.textContent = n === 1 ? "1 ticker" : n + " tickers";
         emptyEl.hidden = n !== 0;
+        clearBtn.hidden = n === 0;
+        if (n === 0) disarmClear();
       } catch (err) {
         setResult("Failed to load watchlist: " + err, "err");
       }
     }
 
+    // Add
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const symbol = document.getElementById("symbol").value;
-      setResult("Fetching latest price for " + symbol.toUpperCase() + "…", "pending");
-
+      setResult("Fetching latest price for " + symbol.toUpperCase() + "\u2026", "pending");
       try {
         const resp = await fetch("/watchlist", {
           method: "POST",
@@ -383,6 +428,72 @@
       } catch (err) {
         setResult("Request failed: " + err, "err");
       }
+    });
+
+    // Delete one (two-step arm/confirm)
+    watchlistBody.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".del");
+      if (!btn) return;
+      if (!btn.classList.contains("armed")) {
+        disarmAll();
+        btn.classList.add("armed");
+        btn.textContent = "Remove";
+        return;
+      }
+      const symbol = btn.dataset.symbol;
+      btn.disabled = true;
+      btn.textContent = "\u2026";
+      try {
+        const resp = await fetch("/watchlist/" + encodeURIComponent(symbol), { method: "DELETE" });
+        const data = await resp.json();
+        if (!resp.ok) {
+          setResult("Error: " + (data.error || resp.statusText), "err");
+          btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "\u2715";
+          return;
+        }
+        setResult("Removed " + symbol + " from your watchlist", "ok");
+        loadWatchlist();
+      } catch (err) {
+        setResult("Request failed: " + err, "err");
+        btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "\u2715";
+      }
+    });
+
+    // Clear all (two-step arm/confirm)
+    clearBtn.addEventListener("click", async () => {
+      if (!clearBtn.classList.contains("armed")) {
+        disarmRows();
+        clearBtn.classList.add("armed");
+        clearBtn.textContent = "Confirm clear all";
+        return;
+      }
+      clearBtn.disabled = true;
+      clearBtn.textContent = "Clearing\u2026";
+      try {
+        const resp = await fetch("/watchlist", { method: "DELETE" });
+        const data = await resp.json();
+        if (!resp.ok) {
+          setResult("Error: " + (data.error || resp.statusText), "err");
+          clearBtn.disabled = false; clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all";
+          return;
+        }
+        const n = data.deleted || 0;
+        setResult(
+          n ? ("Cleared " + n + (n === 1 ? " ticker" : " tickers") + " from your watchlist")
+            : "Watchlist already empty",
+          "ok"
+        );
+        clearBtn.disabled = false; clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all";
+        loadWatchlist();
+      } catch (err) {
+        setResult("Request failed: " + err, "err");
+        clearBtn.disabled = false; clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all";
+      }
+    });
+
+    // Clicking anywhere else cancels any pending confirm
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".del") && !e.target.closest("#clear-all")) disarmAll();
     });
 
     loadWatchlist();
