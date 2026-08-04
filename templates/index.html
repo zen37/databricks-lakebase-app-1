@@ -2,55 +2,338 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Massive Stock Watchlist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: -apple-system, Arial, sans-serif; max-width: 560px; margin: 60px auto; color: #222; }
-    h1 { font-size: 20px; }
-    label { display: block; margin-top: 16px; font-weight: 600; }
-    input[type="text"] { width: 100%; padding: 8px; margin-top: 6px; box-sizing: border-box; }
-    button { margin-top: 16px; padding: 8px 16px; cursor: pointer; }
-    #result { margin-top: 20px; white-space: pre-wrap; background: #f6f6f6; padding: 12px; border-radius: 6px; min-height: 20px; }
-    .hint { color: #777; font-size: 13px; margin-top: 4px; }
-    table { width: 100%; margin-top: 24px; border-collapse: collapse; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
-    th { font-size: 13px; color: #555; text-transform: uppercase; }
+    :root {
+      --ink:      #0B1220;
+      --ink-soft: #47506180;
+      --muted:    #6B7688;
+      --paper:    #F5F6F8;
+      --surface:  #FFFFFF;
+      --line:     #E5E8ED;
+      --line-soft:#EEF1F5;
+      --accent:   #2F44E0;
+      --accent-ink:#1B2ACB;
+      --accent-wash:#EEF0FE;
+      --pos:      #0E9F6E;
+      --neg:      #E02F44;
+      --radius:   14px;
+      --shadow:   0 1px 2px rgba(11,18,32,.04), 0 8px 24px -12px rgba(11,18,32,.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      margin: 0;
+      padding: 48px 20px 80px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 680px; margin: 0 auto; }
+
+    /* ---- Header ---- */
+    .eyebrow {
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--pos);
+      box-shadow: 0 0 0 3px rgba(14,159,110,.15);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+    h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 30px;
+      letter-spacing: -.02em;
+      margin: 0 0 8px;
+    }
+    .lede {
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 46ch;
+      margin: 0 0 32px;
+    }
+
+    /* ---- Add card ---- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .add {
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .add label {
+      display: block;
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .field {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      font-family: "Space Mono", monospace;
+      font-size: 16px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 12px 14px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+    input[type="text"]::placeholder { color: #9AA3B2; }
+    input[type="text"]:focus-visible {
+      border-color: var(--accent);
+      background: var(--surface);
+      box-shadow: 0 0 0 4px var(--accent-wash);
+    }
+    button {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 22px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform .08s ease, background .15s ease;
+    }
+    button:hover { background: #2334C4; }
+    button:active { transform: translateY(1px); }
+    button:focus-visible { outline: 3px solid var(--accent-wash); outline-offset: 2px; }
+
+    /* ---- Result banner ---- */
+    #result {
+      font-family: "Space Mono", monospace;
+      font-size: 13.5px;
+      border-radius: 10px;
+      margin: 0 0 26px;
+      padding: 0 14px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height .25s ease, opacity .2s ease, padding .25s ease;
+    }
+    #result.show { max-height: 80px; opacity: 1; padding: 13px 14px; }
+    #result.ok  { background: #EAF7F1; color: #0B6B4A; border: 1px solid #C7ECDC; }
+    #result.err { background: #FDECEE; color: #A61B2B; border: 1px solid #F6CDD2; }
+    #result.pending { background: var(--accent-wash); color: var(--accent-ink); border: 1px solid #D9DEFB; }
+
+    /* ---- Watchlist board ---- */
+    .board { overflow: hidden; }
+    .board-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .board-head h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0;
+    }
+    .count {
+      font-family: "Space Mono", monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-family: "Space Mono", monospace;
+      font-size: 10.5px;
+      font-weight: 400;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 12px 20px;
+    }
+    thead th.num { text-align: right; }
+
+    tbody tr {
+      border-top: 1px solid var(--line-soft);
+      position: relative;
+      transition: background .12s ease;
+    }
+    tbody tr::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform .15s ease;
+    }
+    tbody tr:hover { background: #FAFBFD; }
+    tbody tr:hover::before { transform: scaleY(1); }
+
+    tbody td {
+      padding: 15px 20px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    .sym {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .02em;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 4px 9px;
+    }
+    td.email { color: var(--muted); font-size: 13px; }
+    td.price {
+      font-family: "Space Mono", monospace;
+      font-weight: 700;
+      font-size: 15px;
+      text-align: right;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    td.price .cur { color: var(--muted); font-weight: 400; margin-right: 2px; }
+    td.updated {
+      font-family: "Space Mono", monospace;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* ---- Empty state ---- */
+    .empty {
+      padding: 44px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty .mark {
+      font-family: "Space Mono", monospace;
+      font-size: 22px;
+      color: #C3CAD6;
+      letter-spacing: .1em;
+      margin-bottom: 8px;
+    }
+    .empty p { margin: 0; font-size: 13.5px; }
+
+    /* ---- Responsive: collapse table to quote cards ---- */
+    @media (max-width: 520px) {
+      body { padding-top: 32px; }
+      h1 { font-size: 25px; }
+      .field { flex-direction: column; }
+      button { width: 100%; }
+      thead { display: none; }
+      tbody tr { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 14px 18px; }
+      tbody tr::before { display: none; }
+      tbody td { padding: 0; border: none; }
+      td.sym-cell { grid-column: 1; grid-row: 1; }
+      td.price { grid-column: 2; grid-row: 1; align-self: center; }
+      td.email { grid-column: 1 / -1; grid-row: 2; }
+      td.updated { grid-column: 1 / -1; grid-row: 3; text-align: left; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
-  <h1>Stock Watchlist</h1>
-  <p class="hint">Enter a single ticker symbol. This sends exactly ONE call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
+  <div class="wrap">
+    <p class="eyebrow">Live market data</p>
+    <h1>Stock Watchlist</h1>
+    <p class="lede">Enter a single ticker symbol. This sends exactly one call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
 
-  <form id="stock-form">
-    <label for="symbol">Ticker symbol</label>
-    <input type="text" id="symbol" name="symbol" placeholder="AAPL" required>
-    <button type="submit">Add to watchlist</button>
-  </form>
+    <form id="stock-form" class="card add">
+      <label for="symbol">Ticker symbol</label>
+      <div class="field">
+        <input type="text" id="symbol" name="symbol" placeholder="AAPL" autocomplete="off" spellcheck="false" required>
+        <button type="submit">Add to watchlist</button>
+      </div>
+    </form>
 
-  <div id="result"></div>
+    <div id="result" role="status" aria-live="polite"></div>
 
-  <table id="watchlist-table">
-    <thead>
-      <tr>
-        <th>Symbol</th>
-        <th>Email</th>
-        <th>Latest price</th>
-        <th>Updated</th>
-      </tr>
-    </thead>
-    <tbody id="watchlist-body"></tbody>
-  </table>
+    <section class="card board">
+      <div class="board-head">
+        <h2>Your tickers</h2>
+        <span class="count" id="count">—</span>
+      </div>
+      <table id="watchlist-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Email</th>
+            <th class="num">Latest price</th>
+            <th class="num">Updated</th>
+          </tr>
+        </thead>
+        <tbody id="watchlist-body"></tbody>
+      </table>
+      <div class="empty" id="empty" hidden>
+        <div class="mark">— · —</div>
+        <p>No tickers yet. Add one above to start tracking.</p>
+      </div>
+    </section>
+  </div>
 
   <script>
     const form = document.getElementById("stock-form");
     const resultEl = document.getElementById("result");
     const watchlistBody = document.getElementById("watchlist-body");
+    const emptyEl = document.getElementById("empty");
+    const countEl = document.getElementById("count");
+
+    function setResult(text, kind) {
+      resultEl.textContent = text;
+      resultEl.className = "show " + (kind || "");
+    }
 
     async function loadWatchlist() {
       try {
         const resp = await fetch("/watchlist");
         const data = await resp.json();
         if (!resp.ok) {
-          resultEl.textContent = "Error loading watchlist: " + (data.error || resp.statusText);
+          setResult("Error loading watchlist: " + (data.error || resp.statusText), "err");
           return;
         }
         watchlistBody.innerHTML = "";
@@ -59,19 +342,29 @@
           const price = row.latest_price !== null && row.latest_price !== undefined
             ? Number(row.latest_price).toFixed(2)
             : "-";
+          const priceCell = price === "-"
+            ? "-"
+            : `<span class="cur">$</span>${price}`;
           const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
-          tr.innerHTML = `<td>${row.symbol}</td><td>${row.email || "-"}</td><td>${price}</td><td>${updated}</td>`;
+          tr.innerHTML =
+            `<td class="sym-cell"><span class="sym">${row.symbol}</span></td>` +
+            `<td class="email">${row.email || "-"}</td>` +
+            `<td class="price">${priceCell}</td>` +
+            `<td class="updated">${updated}</td>`;
           watchlistBody.appendChild(tr);
         });
+        const n = data.length;
+        countEl.textContent = n === 1 ? "1 ticker" : n + " tickers";
+        emptyEl.hidden = n !== 0;
       } catch (err) {
-        resultEl.textContent = "Failed to load watchlist: " + err;
+        setResult("Failed to load watchlist: " + err, "err");
       }
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const symbol = document.getElementById("symbol").value;
-      resultEl.textContent = "Adding to watchlist...";
+      setResult("Fetching latest price for " + symbol.toUpperCase() + "…", "pending");
 
       try {
         const resp = await fetch("/watchlist", {
@@ -81,14 +374,14 @@
         });
         const data = await resp.json();
         if (!resp.ok) {
-          resultEl.textContent = "Error: " + (data.error || resp.statusText);
+          setResult("Error: " + (data.error || resp.statusText), "err");
           return;
         }
-        resultEl.textContent = "Added " + data.symbol + " at price " + data.latest_price;
+        setResult("Added " + data.symbol + " at $" + Number(data.latest_price).toFixed(2), "ok");
         document.getElementById("symbol").value = "";
         loadWatchlist();
       } catch (err) {
-        resultEl.textContent = "Request failed: " + err;
+        setResult("Request failed: " + err, "err");
       }
     });
 
