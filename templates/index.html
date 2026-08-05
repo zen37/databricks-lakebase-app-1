@@ -33,6 +33,7 @@
     }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
     h1 { font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:30px; letter-spacing:-.02em; margin:0 0 8px; }
+    .for-email { font-family:"Space Mono",monospace; font-size:13px; font-weight:400; color:var(--muted); letter-spacing:0; white-space:nowrap; }
     .lede { color:var(--muted); font-size:14px; max-width:46ch; margin:0 0 32px; }
 
     .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
@@ -85,10 +86,11 @@
     .clear:focus-visible { outline:3px solid #F6CDD2; outline-offset:2px; }
     .clear:disabled { opacity:.55; cursor:default; }
 
-    table { width:100%; border-collapse:collapse; }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; }
     thead th {
       font-family:"Space Mono",monospace; font-size:10.5px; font-weight:400; letter-spacing:.14em;
       text-transform:uppercase; color:var(--muted); text-align:left; padding:12px 20px;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
     thead th.num { text-align:right; }
     thead th.act { width:1%; }
@@ -106,10 +108,9 @@
       font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:14px; letter-spacing:.02em;
       color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:7px; padding:4px 9px;
     }
-    td.email { color:var(--muted); font-size:13px; }
     td.price { font-family:"Space Mono",monospace; font-weight:700; font-size:15px; text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; }
     td.price .cur { color:var(--muted); font-weight:400; margin-right:2px; }
-    td.updated { font-family:"Space Mono",monospace; font-size:12px; color:var(--muted); text-align:right; white-space:nowrap; }
+    td.updated { font-family:"Space Mono",monospace; font-size:11.5px; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
     td.act { text-align:right; width:1%; white-space:nowrap; }
     .act-group { display:inline-flex; gap:4px; align-items:center; justify-content:flex-end; }
@@ -168,8 +169,7 @@
       td.sym-cell { grid-column:1; grid-row:1; }
       td.price { grid-column:2; grid-row:1; }
       td.act { grid-column:3; grid-row:1; }
-      td.email { grid-column:1 / -1; grid-row:2; }
-      td.updated { grid-column:1 / -1; grid-row:3; text-align:left; }
+      td.updated { grid-column:1 / -1; grid-row:2; text-align:left; }
     }
     @media (prefers-reduced-motion:reduce) { *,*::before { animation:none !important; transition:none !important; } }
   </style>
@@ -177,7 +177,7 @@
 <body>
   <div class="wrap">
     <p class="eyebrow">Live market data</p>
-    <h1>Stock Watchlist</h1>
+    <h1>Stock Watchlist <span class="for-email">for {{ email }}</span></h1>
     <p class="lede">Enter a single ticker symbol. This sends exactly one call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
 
     <form id="stock-form" class="card add">
@@ -199,10 +199,15 @@
         </div>
       </div>
       <table id="watchlist-table">
+        <colgroup>
+          <col style="width:16%">
+          <col style="width:18%">
+          <col style="width:32%">
+          <col style="width:34%">
+        </colgroup>
         <thead>
           <tr>
             <th>Symbol</th>
-            <th>Email</th>
             <th class="num">Latest price</th>
             <th class="num">Updated</th>
             <th class="act"></th>
@@ -283,7 +288,6 @@
           const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
           tr.innerHTML =
             '<td class="sym-cell"><span class="sym">' + row.symbol + '</span></td>' +
-            '<td class="email">' + (row.email || "-") + '</td>' +
             '<td class="price">' + priceCell + '</td>' +
             '<td class="updated">' + updated + '</td>' +
             '<td class="act"><div class="act-group">' +
@@ -337,7 +341,7 @@
         // open loading panel
         const detail = document.createElement("tr");
         detail.className = "news-row";
-        detail.innerHTML = '<td colspan="5"><div class="news-panel"><div class="news-loading">Fetching news for ' + escapeHtml(symbol) + "\u2026</div></div></td>";
+        detail.innerHTML = '<td colspan="4"><div class="news-panel"><div class="news-loading">Fetching news for ' + escapeHtml(symbol) + "\u2026</div></div></td>";
         tr.after(detail);
         newsBtn.classList.add("open"); newsBtn.textContent = "Hide";
         try {
