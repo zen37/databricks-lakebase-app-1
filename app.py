@@ -96,7 +96,7 @@ def handle_exception(err):
 @app.route("/")
 def index():
     """Simple UI to submit a list of stock symbols to sync from Massive."""
-    return render_template("index.html")
+    return render_template("index.html", email=_current_user_email())
 
 
 @app.route("/records")
