@@ -86,12 +86,38 @@ class MassiveClient:
         data = self.get(f"/v2/aggs/ticker/{symbol}/prev")
         return data
 
-    def get_news(self, symbol: str, limit: int = 5) -> dict:
+def get_news(self, symbol: str, published_gte: str | None = None,
+                 limit: int = 1000, max_pages: int = 5) -> list:
         """
-        Fetch the most recent news articles for a single ticker in a SINGLE
-        API call. Returns the raw Massive /v2/reference/news response.
+        Fetch news for a single ticker, newest first. If `published_gte`
+        (a 'YYYY-MM-DD' date or RFC3339 timestamp) is given, only articles
+        published on/after that moment are returned. Follows the API's
+        next_url pagination up to `max_pages` and returns the combined list.
         """
-        return self.get(
-            "/v2/reference/news",
-            params={"ticker": symbol, "limit": limit},
-        )
+        params = {
+            "ticker": symbol,
+            "limit": limit,
+            "sort": "published_utc",
+            "order": "desc",
+        }
+        if published_gte:
+            params["published_utc.gte"] = published_gte
+
+        data = self.get("/v2/reference/news", params=params)
+        results = list(data.get("results", []) or [])
+
+        next_url = data.get("next_url")
+        pages = 1
+        while next_url and pages < max_pages:
+            page = self._get_url(next_url)
+            results.extend(page.get("results", []) or [])
+            next_url = page.get("next_url")
+            pages += 1
+
+        return results
+
+def _get_url(self, url: str) -> Any:
+    """GET an absolute URL (e.g. a next_url pagination link)."""
+    resp = self._session.get(url, timeout=self.timeout)
+    resp.raise_for_status()
+    return resp.json()
