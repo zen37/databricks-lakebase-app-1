@@ -12,6 +12,7 @@ Deploy as a Databricks App using app.yaml.
 import logging
 import os
 import re
+from datetime import datetime, timezone, timedelta
 
 import requests
 from databricks.sdk import WorkspaceClient
@@ -232,19 +233,20 @@ def delete_from_watchlist(symbol):
 
 @app.route("/news/<symbol>", methods=["GET"])
 def get_ticker_news(symbol):
-    """Return recent news articles for a single ticker (one Massive API call)."""
+    """Return news for a single ticker over the last N days (default 30)."""
     symbol = symbol.strip().upper() if isinstance(symbol, str) else ""
     if not symbol or not _TICKER_RE.match(symbol):
         return jsonify({"error": f"Invalid ticker symbol: {symbol!r}"}), 400
 
-    limit = int(request.args.get("limit", 5))
+    days = int(request.args.get("days", 30))
+    gte = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+
     client = MassiveClient()
     try:
-        data = client.get_news(symbol, limit=limit)
+        results = client.get_news(symbol, published_gte=gte)
     except requests.HTTPError:
         return jsonify({"error": f"Could not fetch news for {symbol}"}), 400
 
-    results = data.get("results", []) if isinstance(data, dict) else []
     articles = []
     for a in results:
         desc = (a.get("description") or "").strip()
@@ -258,7 +260,7 @@ def get_ticker_news(symbol):
             "description": desc,
             "sentiment": _news_sentiment(a.get("insights"), symbol),
         })
-    return jsonify({"symbol": symbol, "articles": articles})
+    return jsonify({"symbol": symbol, "days": days, "count": len(articles), "articles": articles})
 
 
 def _news_sentiment(insights, symbol):
