@@ -13,11 +13,12 @@
       --line:#E5E8ED; --line-soft:#EEF1F5; --accent:#2F44E0; --accent-ink:#1B2ACB;
       --accent-wash:#EEF0FE; --pos:#0E9F6E; --neg:#E02F44;
       --radius:14px; --shadow:0 1px 2px rgba(11,18,32,.04), 0 8px 24px -12px rgba(11,18,32,.10);
-      --wl-cols: 15% 17% 33% 35%;
+      --wl-cols: 12% 15% 24% 24% 25%;
     }
     * { box-sizing:border-box; }
     body { font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif; background:var(--paper); color:var(--ink); margin:0; padding:48px 20px 80px; line-height:1.5; -webkit-font-smoothing:antialiased; }
-    .wrap { max-width:680px; margin:0 auto; }
+    .wrap { max-width:1000px; margin:0 auto; }
+    .eyebrow, h1, .lede, .add, #result { max-width:680px; }
 
     .eyebrow { font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; margin:0 0 10px; }
     .eyebrow::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--pos); box-shadow:0 0 0 3px rgba(14,159,110,.15); animation:pulse 2.4s ease-in-out infinite; }
@@ -55,6 +56,9 @@
     .clear.armed { color:#fff; background:var(--neg); border-color:var(--neg); font-family:"Space Grotesk",sans-serif; font-weight:600; text-transform:none; letter-spacing:0; }
     .clear:focus-visible { outline:3px solid #F6CDD2; outline-offset:2px; }
     .clear:disabled { opacity:.55; cursor:default; }
+    .refresh { font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:400; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; padding:6px 12px; cursor:pointer; transition:color .12s,background .12s,border-color .12s; }
+    .refresh:hover { color:var(--accent); border-color:var(--accent); background:var(--accent-wash); }
+    .refresh:disabled { opacity:.55; cursor:default; }
 
     /* ---- Grid-based watchlist (header + every row share --wl-cols) ---- */
     .wl-row { display:grid; grid-template-columns:var(--wl-cols); align-items:center; padding:0 20px; }
@@ -69,9 +73,10 @@
     .quote > div { padding:15px 0; font-size:14px; overflow:hidden; }
 
     .sym { display:inline-block; font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:14px; letter-spacing:.02em; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:7px; padding:4px 9px; }
-    .c-price { font-family:"Space Mono",monospace; font-weight:700; font-size:15px; text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; }
+    .c-price { font-family:"Space Mono",monospace; font-weight:700; font-size:15px; text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; padding-right:14px; }
     .c-price .cur { color:var(--muted); font-weight:400; margin-right:2px; }
-    .c-upd { font-family:"Space Mono",monospace; font-size:11.5px; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .c-upd, .c-ptime { font-family:"Space Mono",monospace; font-size:11.5px; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cell-label { display:none; }
     .c-act { display:flex; gap:4px; align-items:center; justify-content:flex-end; }
 
     .news { font-family:"Space Mono",monospace; font-size:12px; font-weight:400; color:var(--muted); background:transparent; border:1px solid transparent; border-radius:7px; padding:5px 9px; cursor:pointer; transition:color .12s,background .12s; }
@@ -123,7 +128,9 @@
       .c-sym { grid-column:1; grid-row:1; }
       .c-price { grid-column:2; grid-row:1; text-align:left; }
       .c-act { grid-column:3; grid-row:1; }
-      .c-upd { grid-column:1 / -1; grid-row:2; text-align:left; }
+      .c-ptime { grid-column:1 / -1; grid-row:2; text-align:left; }
+      .c-upd { grid-column:1 / -1; grid-row:3; text-align:left; }
+      .cell-label { display:inline-block; color:var(--muted); text-transform:uppercase; font-size:9.5px; letter-spacing:.1em; margin-right:6px; }
     }
     @media (prefers-reduced-motion:reduce) { *,*::before { animation:none !important; transition:none !important; } }
   </style>
@@ -149,6 +156,7 @@
         <h2>Your tickers</h2>
         <div class="head-right">
           <span class="count" id="count">&mdash;</span>
+          <button type="button" id="refresh-all" class="refresh" hidden>Refresh</button>
           <button type="button" id="clear-all" class="clear" hidden>Clear all</button>
         </div>
       </div>
@@ -156,6 +164,7 @@
         <div class="wl-row wl-head" role="row">
           <div role="columnheader">Symbol</div>
           <div class="num" role="columnheader">Latest price</div>
+          <div class="num" role="columnheader">Price time</div>
           <div class="num" role="columnheader">Updated</div>
           <div role="columnheader"></div>
         </div>
@@ -175,8 +184,15 @@
     const emptyEl = document.getElementById("empty");
     const countEl = document.getElementById("count");
     const clearBtn = document.getElementById("clear-all");
+    const refreshBtn = document.getElementById("refresh-all");
 
     function setResult(text, kind) { resultEl.textContent = text; resultEl.className = "show " + (kind || ""); }
+    function fmtTime(iso) {
+      if (!iso) return "-";
+      const d = new Date(iso);
+      return isNaN(d) ? "-" : d.toLocaleString();
+    }
+
     function escapeHtml(s) {
       return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
     }
@@ -246,11 +262,13 @@
           el.setAttribute("role", "row");
           const price = row.latest_price !== null && row.latest_price !== undefined ? Number(row.latest_price).toFixed(2) : "-";
           const priceCell = price === "-" ? "-" : '<span class="cur">$</span>' + price;
-          const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
+          const updated = fmtTime(row.updated_at);
+          const ptime = fmtTime(row.price_time);
           el.innerHTML =
             '<div class="c-sym"><span class="sym">' + row.symbol + '</span></div>' +
             '<div class="c-price num">' + priceCell + '</div>' +
-            '<div class="c-upd num">' + updated + '</div>' +
+            '<div class="c-ptime num"><span class="cell-label">Price time</span>' + ptime + '</div>' +
+            '<div class="c-upd num"><span class="cell-label">Updated</span>' + updated + '</div>' +
             '<div class="c-act">' +
               '<button type="button" class="news" data-symbol="' + row.symbol + '" aria-label="Show news for ' + row.symbol + '">News</button>' +
               '<button type="button" class="del" data-symbol="' + row.symbol + '" aria-label="Remove ' + row.symbol + ' from watchlist">Remove</button>' +
@@ -261,6 +279,7 @@
         countEl.textContent = n === 1 ? "1 ticker" : n + " tickers";
         emptyEl.hidden = n !== 0;
         clearBtn.hidden = n === 0;
+        refreshBtn.hidden = n === 0;
         if (n === 0) disarmClear();
       } catch (err) { setResult("Failed to load watchlist: " + err, "err"); }
     }
@@ -336,6 +355,31 @@
         clearBtn.disabled=false; clearBtn.classList.remove("armed"); clearBtn.textContent="Clear all";
         loadWatchlist();
       } catch (err) { setResult("Request failed: " + err, "err"); clearBtn.disabled=false; clearBtn.classList.remove("armed"); clearBtn.textContent="Clear all"; }
+    });
+
+    // Refresh: re-fetch latest price for every symbol
+    refreshBtn.addEventListener("click", async () => {
+      refreshBtn.disabled = true;
+      const orig = refreshBtn.textContent;
+      refreshBtn.textContent = "Refreshing\u2026";
+      setResult("Refreshing prices\u2026", "pending");
+      try {
+        const resp = await fetch("/watchlist/refresh", { method: "POST" });
+        const data = await resp.json();
+        if (!resp.ok) {
+          setResult("Error: " + (data.error || resp.statusText), "err");
+        } else {
+          const skipped = (data.failed && data.failed.length) ? (" \u00b7 " + data.failed.length + " skipped") : "";
+          const u = data.updated || 0;
+          setResult("Refreshed " + u + (u === 1 ? " price" : " prices") + skipped, "ok");
+        }
+        loadWatchlist();
+      } catch (err) {
+        setResult("Request failed: " + err, "err");
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = orig;
+      }
     });
 
     document.addEventListener("click", (e) => { if (!e.target.closest(".del") && !e.target.closest("#clear-all")) disarmAll(); });
