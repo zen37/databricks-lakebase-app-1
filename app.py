@@ -57,10 +57,15 @@ def ensure_watchlist_table():
             symbol TEXT NOT NULL,
             email TEXT NOT NULL,
             latest_price NUMERIC,
+            price_time TIMESTAMPTZ,
             updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
             PRIMARY KEY (symbol, email)
         )
         """
+    )
+    # For tables created before price_time existed:
+    lakebase.run_write(
+        f"ALTER TABLE {WATCHLIST_TABLE_NAME} ADD COLUMN IF NOT EXISTS price_time TIMESTAMPTZ"
     )
 
 
@@ -143,7 +148,7 @@ def get_watchlist():
     ensure_watchlist_table()
     email = _current_user_email()
     rows = lakebase.run_query(
-        f"SELECT symbol, email, latest_price, updated_at FROM {WATCHLIST_TABLE_NAME} "
+        f"SELECT symbol, email, latest_price, price_time, updated_at FROM {WATCHLIST_TABLE_NAME} "
         f"WHERE email = %s ORDER BY symbol ASC",
         (email,),
     )
@@ -183,16 +188,18 @@ def add_to_watchlist():
         return jsonify({"error": f"No price data available for ticker: {symbol}"}), 400
 
     email = _current_user_email()
+    price_time = _extract_price_time(data)
 
     lakebase.run_write(
         f"""
-        INSERT INTO {WATCHLIST_TABLE_NAME} (symbol, email, latest_price, updated_at)
-        VALUES (%s, %s, %s, now())
+        INSERT INTO {WATCHLIST_TABLE_NAME} (symbol, email, latest_price, price_time, updated_at)
+        VALUES (%s, %s, %s, %s, now())
         ON CONFLICT (symbol, email) DO UPDATE
             SET latest_price = EXCLUDED.latest_price,
-                updated_at = EXCLUDED.updated_at
+                price_time   = EXCLUDED.price_time,
+                updated_at   = EXCLUDED.updated_at
         """,
-        (symbol, email, price),
+        (symbol, email, price, price_time),
     )
 
     return jsonify({"symbol": symbol, "email": email, "latest_price": price})
@@ -263,6 +270,49 @@ def get_ticker_news(symbol):
     return jsonify({"symbol": symbol, "days": days, "count": len(articles), "articles": articles})
 
 
+@app.route("/watchlist/refresh", methods=["POST"])
+def refresh_watchlist():
+    """
+    Re-fetch the latest price for each of the user's watchlist symbols and
+    update Lakebase. Returns how many updated and which were skipped.
+
+    Note: on the free tier with the previous-close fallback, prices only
+    change once per trading day. Per-symbol failures (e.g. rate limits) are
+    skipped so the rest still refresh and keep their last known price.
+    """
+    ensure_watchlist_table()
+    email = _current_user_email()
+
+    rows = lakebase.run_query(
+        f"SELECT symbol FROM {WATCHLIST_TABLE_NAME} WHERE email = %s ORDER BY symbol ASC",
+        (email,),
+    )
+    symbols = [r["symbol"] for r in rows]
+
+    client = MassiveClient()
+    updated, failed = 0, []
+    for symbol in symbols:
+        try:
+            data = client.get_latest_price(symbol)
+            price = _extract_latest_price(data)
+        except requests.HTTPError:
+            price, data = None, None
+        if price is None:
+            failed.append(symbol)
+            continue
+        lakebase.run_write(
+            f"""
+            UPDATE {WATCHLIST_TABLE_NAME}
+               SET latest_price = %s, price_time = %s, updated_at = now()
+             WHERE symbol = %s AND email = %s
+            """,
+            (price, _extract_price_time(data), symbol, email),
+        )
+        updated += 1
+
+    return jsonify({"updated": updated, "failed": failed})
+
+
 def _news_sentiment(insights, symbol):
     """Pick the sentiment for this ticker from Massive's insights array."""
     if not isinstance(insights, list):
@@ -273,6 +323,58 @@ def _news_sentiment(insights, symbol):
     for ins in insights:  # fallback: first available
         if isinstance(ins, dict) and ins.get("sentiment"):
             return ins.get("sentiment")
+    return None
+
+
+def _epoch_to_dt(value):
+    """Normalize an epoch in s / ms / ns to a UTC datetime."""
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return None
+    if v <= 0:
+        return None
+    if v > 1e17:      # nanoseconds
+        v /= 1e9
+    elif v > 1e14:    # microseconds
+        v /= 1e6
+    elif v > 1e11:    # milliseconds
+        v /= 1e3
+    try:
+        return datetime.fromtimestamp(v, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
+def _extract_latest_price(data: dict):
+    """Pull a price from either the snapshot response or the previous-close
+    aggregate response, preferring the most current field available."""
+    if not isinstance(data, dict):
+        return None
+
+    # Snapshot shape: {"ticker": {"lastTrade":{"p":..}, "min":{"c":..},
+    #                             "day":{"c":..}, "prevDay":{"c":..}}}
+    t = data.get("ticker")
+    if isinstance(t, dict):
+        last = t.get("lastTrade")
+        if isinstance(last, dict) and last.get("p"):
+            return last["p"]
+        for section in ("min", "day", "prevDay"):
+            bar = t.get(section)
+            if isinstance(bar, dict) and bar.get("c"):
+                return bar["c"]
+        return None
+
+    # Previous-close aggregate shape: {"results": [{"c": ..}]}
+    if data.get("status") not in (None, "OK") or data.get("resultsCount") == 0:
+        return None
+    results = data.get("results", data)
+    if isinstance(results, list):
+        results = results[0] if results else None
+    if isinstance(results, dict):
+        for key in ("c", "p", "price", "last_price", "vw"):
+            if key in results:
+                return results[key]
     return None
 
 
@@ -303,6 +405,8 @@ def _extract_latest_price(data: dict) -> float | None:
             if key in results:
                 return results[key]
     return None
+
+
 
 
 def _upsert_batch(items: list[dict]) -> int:

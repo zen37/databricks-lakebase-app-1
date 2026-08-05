@@ -75,16 +75,28 @@ class MassiveClient:
             if not cursor:
                 break
 
+
+    def get_snapshot(self, symbol: str) -> dict:
+        """
+        Single-ticker snapshot: current minute bar, day bar, previous-day bar,
+        and last trade/quote. On the free tier this is 15-minute-delayed, and
+        MAY be gated (HTTP 403) depending on the plan.
+        """
+        return self.get(f"/v2/snapshot/locale/us/markets/stocks/tickers/{symbol}")
+
+
     def get_latest_price(self, symbol: str) -> dict:
         """
-        Fetch the latest traded price for a single symbol in a SINGLE API
-        call (no pagination). Use this instead of paginated_get() whenever
-        the caller needs to stay within tight API rate limits (e.g.
-        classroom/student accounts), at the cost of only being able to
-        request one symbol per request.
+        Return the most current price data available for one symbol. Prefers
+        the snapshot endpoint (intraday, ~15-min delayed on free) and falls
+        back to the previous-close aggregate if snapshot isn't permitted on
+        this plan.
         """
-        data = self.get(f"/v2/aggs/ticker/{symbol}/prev")
-        return data
+        try:
+            return self.get_snapshot(symbol)
+        except requests.HTTPError:
+            return self.get(f"/v2/aggs/ticker/{symbol}/prev")
+
 
     def get_news(self, symbol: str, published_gte: str | None = None,
                     limit: int = 1000, max_pages: int = 5) -> list:
