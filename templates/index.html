@@ -24,6 +24,7 @@
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
     h1 { font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:30px; letter-spacing:-.02em; margin:0 0 8px; }
     .for-email { font-family:"Space Mono",monospace; font-size:13px; font-weight:400; color:var(--muted); letter-spacing:0; white-space:nowrap; }
+    .email-badge { display:inline-block; color:var(--accent-ink); background:var(--accent-wash); border:1px solid #D9DEFB; border-radius:6px; padding:2px 8px; font-weight:700; }
     .lede { color:var(--muted); font-size:14px; max-width:46ch; margin:0 0 32px; }
 
     .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
@@ -85,7 +86,13 @@
 
     /* News panel (full-width sibling row) */
     .wl-news { background:#FBFCFD; border-top:1px solid var(--line-soft); }
-    .news-panel { padding:4px 20px 18px; }
+    .news-panel { padding:4px 20px 18px; max-height:440px; overflow-y:auto; }
+    .news-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0 12px; position:sticky; top:0; background:#FBFCFD; z-index:1; }
+    .news-count { font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+    .news-range-group { display:inline-flex; gap:4px; flex-shrink:0; }
+    .news-range { font-family:"Space Mono",monospace; font-size:11px; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:6px; padding:4px 9px; cursor:pointer; transition:color .12s,background .12s,border-color .12s; }
+    .news-range:hover { border-color:var(--accent); color:var(--accent); }
+    .news-range.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
     .news-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:13px; }
     .news-list li { padding-left:14px; border-left:2px solid var(--line); }
     .news-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
@@ -124,7 +131,7 @@
 <body>
   <div class="wrap">
     <p class="eyebrow">Live market data</p>
-    <h1>Stock Watchlist <span class="for-email">for {{ email }}</span></h1>
+    <h1>Stock Watchlist <span class="for-email">for <span class="email-badge">{{ email }}</span></span></h1>
     <p class="lede">Enter a single ticker symbol. This sends exactly one call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
 
     <form id="stock-form" class="card add">
@@ -177,14 +184,40 @@
     function disarmClear() { if (clearBtn.classList.contains("armed")) { clearBtn.classList.remove("armed"); clearBtn.textContent="Clear all"; } }
     function disarmAll() { disarmRows(); disarmClear(); }
 
+    async function loadNews(symbol, panel, days) {
+      if (!panel) return;
+      panel.innerHTML = '<div class="news-loading">Fetching news for ' + escapeHtml(symbol) + " \u00b7 last " + days + ' days\u2026</div>';
+      try {
+        const resp = await fetch("/news/" + encodeURIComponent(symbol) + "?days=" + encodeURIComponent(days));
+        const data = await resp.json();
+        panel.innerHTML = resp.ok ? renderNews(data) : '<div class="news-empty">' + escapeHtml(data.error || resp.statusText) + "</div>";
+      } catch (err) {
+        panel.innerHTML = '<div class="news-empty">Failed to load news: ' + escapeHtml(String(err)) + "</div>";
+      }
+    }
+
     function sentimentTag(s) {
       if (!s) return "";
       const k = String(s).toLowerCase();
       const cls = k === "positive" ? "pos" : k === "negative" ? "neg" : "neu";
       return '<span class="senti ' + cls + '">' + escapeHtml(k) + "</span>";
     }
-    function renderNews(articles) {
-      if (!articles || !articles.length) return '<div class="news-empty">No recent news for this ticker.</div>';
+    function renderNews(data) {
+      const articles = (data && data.articles) || [];
+      const days = (data && data.days) || 30;
+      const sym0 = (data && data.symbol) || "";
+      const ranges0 = [7, 30, 90].map((d) =>
+        '<button type="button" class="news-range' + (d === days ? " active" : "") + '" data-symbol="' + escapeHtml(sym0) + '" data-days="' + d + '">' + d + 'd</button>'
+      ).join("");
+      const toolbar0 = '<div class="news-toolbar"><div class="news-count">0 articles \u00b7 last ' + days + ' days</div><div class="news-range-group">' + ranges0 + '</div></div>';
+      if (!articles.length) return toolbar0 + '<div class="news-empty">No news in the last ' + days + ' days.</div>';
+      const sym = (data && data.symbol) || "";
+      const ranges = [7, 30, 90].map((d) =>
+        '<button type="button" class="news-range' + (d === days ? " active" : "") + '" data-symbol="' + escapeHtml(sym) + '" data-days="' + d + '">' + d + 'd</button>'
+      ).join("");
+      const header = '<div class="news-toolbar"><div class="news-count">' +
+        articles.length + (articles.length === 1 ? " article" : " articles") + " \u00b7 last " + days + ' days</div>' +
+        '<div class="news-range-group">' + ranges + '</div></div>';
       const items = articles.map((a) => {
         const dt = a.published_utc ? new Date(a.published_utc).toLocaleDateString() : "";
         const meta = [a.publisher, dt].filter(Boolean).map(escapeHtml).join(" \u00b7 ");
@@ -198,7 +231,7 @@
           (a.description ? '<div class="news-desc">' + escapeHtml(a.description) + "</div>" : "") +
           (meta ? '<div class="news-meta">' + meta + "</div>" : "") + "</li>";
       }).join("");
-      return '<ul class="news-list">' + items + "</ul>";
+      return header + '<ul class="news-list">' + items + "</ul>";
     }
 
     async function loadWatchlist() {
@@ -261,19 +294,18 @@
         watchlistBody.querySelectorAll(".news.open").forEach((b)=>{ b.classList.remove("open"); b.textContent="News"; });
         const detail = document.createElement("div");
         detail.className = "wl-news";
-        detail.innerHTML = '<div class="news-panel"><div class="news-loading">Fetching news for ' + escapeHtml(symbol) + "\u2026</div></div>";
+        detail.innerHTML = '<div class="news-panel"></div>';
         row.after(detail);
         newsBtn.classList.add("open"); newsBtn.textContent = "Hide";
-        try {
-          const resp = await fetch("/news/" + encodeURIComponent(symbol));
-          const data = await resp.json();
-          const panel = detail.querySelector(".news-panel");
-          if (!panel) return;
-          panel.innerHTML = resp.ok ? renderNews(data.articles || []) : '<div class="news-empty">' + escapeHtml(data.error || resp.statusText) + "</div>";
-        } catch (err) {
-          const panel = detail.querySelector(".news-panel");
-          if (panel) panel.innerHTML = '<div class="news-empty">Failed to load news: ' + escapeHtml(String(err)) + "</div>";
-        }
+        loadNews(symbol, detail.querySelector(".news-panel"), 30);
+        return;
+      }
+
+      // News range selector (7 / 30 / 90 days)
+      const rangeBtn = e.target.closest(".news-range");
+      if (rangeBtn) {
+        const panel = rangeBtn.closest(".news-panel");
+        if (panel) loadNews(rangeBtn.dataset.symbol, panel, rangeBtn.dataset.days);
         return;
       }
 
