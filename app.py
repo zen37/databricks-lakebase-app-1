@@ -230,6 +230,49 @@ def delete_from_watchlist(symbol):
     return jsonify({"symbol": symbol, "deleted": deleted})
 
 
+@app.route("/news/<symbol>", methods=["GET"])
+def get_ticker_news(symbol):
+    """Return recent news articles for a single ticker (one Massive API call)."""
+    symbol = symbol.strip().upper() if isinstance(symbol, str) else ""
+    if not symbol or not _TICKER_RE.match(symbol):
+        return jsonify({"error": f"Invalid ticker symbol: {symbol!r}"}), 400
+
+    limit = int(request.args.get("limit", 5))
+    client = MassiveClient()
+    try:
+        data = client.get_news(symbol, limit=limit)
+    except requests.HTTPError:
+        return jsonify({"error": f"Could not fetch news for {symbol}"}), 400
+
+    results = data.get("results", []) if isinstance(data, dict) else []
+    articles = []
+    for a in results:
+        desc = (a.get("description") or "").strip()
+        if len(desc) > 300:
+            desc = desc[:300].rstrip() + "\u2026"
+        articles.append({
+            "title": a.get("title"),
+            "url": a.get("article_url"),
+            "publisher": (a.get("publisher") or {}).get("name"),
+            "published_utc": a.get("published_utc"),
+            "description": desc,
+            "sentiment": _news_sentiment(a.get("insights"), symbol),
+        })
+    return jsonify({"symbol": symbol, "articles": articles})
+
+
+def _news_sentiment(insights, symbol):
+    """Pick the sentiment for this ticker from Massive's insights array."""
+    if not isinstance(insights, list):
+        return None
+    for ins in insights:
+        if isinstance(ins, dict) and ins.get("ticker") == symbol and ins.get("sentiment"):
+            return ins.get("sentiment")
+    for ins in insights:  # fallback: first available
+        if isinstance(ins, dict) and ins.get("sentiment"):
+            return ins.get("sentiment")
+    return None
+
 
 def _extract_latest_price(data: dict) -> float | None:
     """Pull the trade price out of the Massive 'previous close' response shape.

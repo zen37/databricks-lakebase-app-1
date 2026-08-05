@@ -9,296 +9,168 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink:      #0B1220;
-      --muted:    #6B7688;
-      --paper:    #F5F6F8;
-      --surface:  #FFFFFF;
-      --line:     #E5E8ED;
-      --line-soft:#EEF1F5;
-      --accent:   #2F44E0;
-      --accent-ink:#1B2ACB;
-      --accent-wash:#EEF0FE;
-      --pos:      #0E9F6E;
-      --neg:      #E02F44;
-      --radius:   14px;
-      --shadow:   0 1px 2px rgba(11,18,32,.04), 0 8px 24px -12px rgba(11,18,32,.10);
+      --ink:#0B1220; --muted:#6B7688; --paper:#F5F6F8; --surface:#FFFFFF;
+      --line:#E5E8ED; --line-soft:#EEF1F5; --accent:#2F44E0; --accent-ink:#1B2ACB;
+      --accent-wash:#EEF0FE; --pos:#0E9F6E; --neg:#E02F44;
+      --radius:14px; --shadow:0 1px 2px rgba(11,18,32,.04), 0 8px 24px -12px rgba(11,18,32,.10);
     }
-
     * { box-sizing: border-box; }
-
     body {
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--paper);
-      color: var(--ink);
-      margin: 0;
-      padding: 48px 20px 80px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
+      font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+      background:var(--paper); color:var(--ink); margin:0; padding:48px 20px 80px;
+      line-height:1.5; -webkit-font-smoothing:antialiased;
     }
-
-    .wrap { max-width: 680px; margin: 0 auto; }
+    .wrap { max-width:680px; margin:0 auto; }
 
     .eyebrow {
-      font-family: "Space Mono", monospace;
-      font-size: 11px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 10px;
+      font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.18em;
+      text-transform:uppercase; color:var(--muted); display:flex; align-items:center;
+      gap:8px; margin:0 0 10px;
     }
     .eyebrow::before {
-      content: "";
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--pos);
-      box-shadow: 0 0 0 3px rgba(14,159,110,.15);
-      animation: pulse 2.4s ease-in-out infinite;
+      content:""; width:7px; height:7px; border-radius:50%; background:var(--pos);
+      box-shadow:0 0 0 3px rgba(14,159,110,.15); animation:pulse 2.4s ease-in-out infinite;
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
-    h1 {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      font-size: 30px;
-      letter-spacing: -.02em;
-      margin: 0 0 8px;
-    }
-    .lede { color: var(--muted); font-size: 14px; max-width: 46ch; margin: 0 0 32px; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+    h1 { font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:30px; letter-spacing:-.02em; margin:0 0 8px; }
+    .lede { color:var(--muted); font-size:14px; max-width:46ch; margin:0 0 32px; }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .add { padding: 20px; margin-bottom: 14px; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+    .add { padding:20px; margin-bottom:14px; }
     .add label {
-      display: block;
-      font-family: "Space Mono", monospace;
-      font-size: 11px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
+      display:block; font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--muted); margin-bottom:10px;
     }
-    .field { display: flex; gap: 10px; }
+    .field { display:flex; gap:10px; }
     input[type="text"] {
-      flex: 1;
-      font-family: "Space Mono", monospace;
-      font-size: 16px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      padding: 12px 14px;
-      color: var(--ink);
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      outline: none;
-      transition: border-color .15s, box-shadow .15s, background .15s;
+      flex:1; font-family:"Space Mono",monospace; font-size:16px; letter-spacing:.06em;
+      text-transform:uppercase; padding:12px 14px; color:var(--ink); background:var(--paper);
+      border:1px solid var(--line); border-radius:10px; outline:none;
+      transition:border-color .15s,box-shadow .15s,background .15s;
     }
-    input[type="text"]::placeholder { color: #9AA3B2; }
-    input[type="text"]:focus-visible {
-      border-color: var(--accent);
-      background: var(--surface);
-      box-shadow: 0 0 0 4px var(--accent-wash);
-    }
+    input[type="text"]::placeholder { color:#9AA3B2; }
+    input[type="text"]:focus-visible { border-color:var(--accent); background:var(--surface); box-shadow:0 0 0 4px var(--accent-wash); }
     button {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 600;
-      font-size: 15px;
-      color: #fff;
-      background: var(--accent);
-      border: none;
-      border-radius: 10px;
-      padding: 12px 22px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: transform .08s ease, background .15s ease;
+      font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:15px; color:#fff;
+      background:var(--accent); border:none; border-radius:10px; padding:12px 22px; cursor:pointer;
+      white-space:nowrap; transition:transform .08s ease,background .15s ease;
     }
-    button:hover { background: #2334C4; }
-    button:active { transform: translateY(1px); }
-    button:focus-visible { outline: 3px solid var(--accent-wash); outline-offset: 2px; }
+    button:hover { background:#2334C4; }
+    button:active { transform:translateY(1px); }
+    button:focus-visible { outline:3px solid var(--accent-wash); outline-offset:2px; }
 
     #result {
-      font-family: "Space Mono", monospace;
-      font-size: 13.5px;
-      border-radius: 10px;
-      margin: 0 0 26px;
-      padding: 0 14px;
-      max-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: max-height .25s ease, opacity .2s ease, padding .25s ease;
+      font-family:"Space Mono",monospace; font-size:13.5px; border-radius:10px; margin:0 0 26px;
+      padding:0 14px; max-height:0; overflow:hidden; opacity:0;
+      transition:max-height .25s ease,opacity .2s ease,padding .25s ease;
     }
-    #result.show { max-height: 80px; opacity: 1; padding: 13px 14px; }
-    #result.ok  { background: #EAF7F1; color: #0B6B4A; border: 1px solid #C7ECDC; }
-    #result.err { background: #FDECEE; color: #A61B2B; border: 1px solid #F6CDD2; }
-    #result.pending { background: var(--accent-wash); color: var(--accent-ink); border: 1px solid #D9DEFB; }
+    #result.show { max-height:80px; opacity:1; padding:13px 14px; }
+    #result.ok { background:#EAF7F1; color:#0B6B4A; border:1px solid #C7ECDC; }
+    #result.err { background:#FDECEE; color:#A61B2B; border:1px solid #F6CDD2; }
+    #result.pending { background:var(--accent-wash); color:var(--accent-ink); border:1px solid #D9DEFB; }
 
-    .board { overflow: hidden; }
-    .board-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--line-soft);
-    }
-    .board-head h2 {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      margin: 0;
-    }
-    .head-right { display: flex; align-items: center; gap: 12px; }
-    .count { font-family: "Space Mono", monospace; font-size: 12px; color: var(--muted); }
+    .board { overflow:hidden; }
+    .board-head { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--line-soft); }
+    .board-head h2 { font-family:"Space Grotesk",sans-serif; font-size:15px; font-weight:600; margin:0; }
+    .head-right { display:flex; align-items:center; gap:12px; }
+    .count { font-family:"Space Mono",monospace; font-size:12px; color:var(--muted); }
 
     .clear {
-      font-family: "Space Mono", monospace;
-      font-size: 11px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-weight: 400;
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 6px 12px;
-      transition: color .12s, background .12s, border-color .12s;
+      font-family:"Space Mono",monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+      font-weight:400; color:var(--muted); background:transparent; border:1px solid var(--line);
+      border-radius:8px; padding:6px 12px; transition:color .12s,background .12s,border-color .12s;
     }
-    .clear:hover { color: var(--neg); border-color: #F6CDD2; background: #FDECEE; }
-    .clear.armed {
-      color: #fff;
-      background: var(--neg);
-      border-color: var(--neg);
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 600;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-    .clear:focus-visible { outline: 3px solid #F6CDD2; outline-offset: 2px; }
-    .clear:disabled { opacity: .55; cursor: default; }
+    .clear:hover { color:var(--neg); border-color:#F6CDD2; background:#FDECEE; }
+    .clear.armed { color:#fff; background:var(--neg); border-color:var(--neg); font-family:"Space Grotesk",sans-serif; font-weight:600; text-transform:none; letter-spacing:0; }
+    .clear:focus-visible { outline:3px solid #F6CDD2; outline-offset:2px; }
+    .clear:disabled { opacity:.55; cursor:default; }
 
-    table { width: 100%; border-collapse: collapse; }
+    table { width:100%; border-collapse:collapse; }
     thead th {
-      font-family: "Space Mono", monospace;
-      font-size: 10.5px;
-      font-weight: 400;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: left;
-      padding: 12px 20px;
+      font-family:"Space Mono",monospace; font-size:10.5px; font-weight:400; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--muted); text-align:left; padding:12px 20px;
     }
-    thead th.num { text-align: right; }
-    thead th.act { width: 1%; }
+    thead th.num { text-align:right; }
+    thead th.act { width:1%; }
 
-    tbody tr {
-      border-top: 1px solid var(--line-soft);
-      position: relative;
-      transition: background .12s ease;
+    tbody tr.quote { border-top:1px solid var(--line-soft); position:relative; transition:background .12s ease; }
+    tbody tr.quote::before {
+      content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent);
+      transform:scaleY(0); transform-origin:center; transition:transform .15s ease;
     }
-    tbody tr::before {
-      content: "";
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transform-origin: center;
-      transition: transform .15s ease;
-    }
-    tbody tr:hover { background: #FAFBFD; }
-    tbody tr:hover::before { transform: scaleY(1); }
+    tbody tr.quote:hover { background:#FAFBFD; }
+    tbody tr.quote:hover::before { transform:scaleY(1); }
+    tbody td { padding:15px 20px; font-size:14px; vertical-align:middle; }
 
-    tbody td { padding: 15px 20px; font-size: 14px; vertical-align: middle; }
     .sym {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: .02em;
-      color: var(--ink);
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      padding: 4px 9px;
+      font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:14px; letter-spacing:.02em;
+      color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:7px; padding:4px 9px;
     }
-    td.email { color: var(--muted); font-size: 13px; }
-    td.price {
-      font-family: "Space Mono", monospace;
-      font-weight: 700;
-      font-size: 15px;
-      text-align: right;
-      color: var(--ink);
-      font-variant-numeric: tabular-nums;
-    }
-    td.price .cur { color: var(--muted); font-weight: 400; margin-right: 2px; }
-    td.updated {
-      font-family: "Space Mono", monospace;
-      font-size: 12px;
-      color: var(--muted);
-      text-align: right;
-      white-space: nowrap;
-    }
+    td.email { color:var(--muted); font-size:13px; }
+    td.price { font-family:"Space Mono",monospace; font-weight:700; font-size:15px; text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; }
+    td.price .cur { color:var(--muted); font-weight:400; margin-right:2px; }
+    td.updated { font-family:"Space Mono",monospace; font-size:12px; color:var(--muted); text-align:right; white-space:nowrap; }
 
-    td.act { text-align: right; width: 1%; white-space: nowrap; padding-left: 8px; }
+    td.act { text-align:right; width:1%; white-space:nowrap; }
+    .act-group { display:inline-flex; gap:4px; align-items:center; justify-content:flex-end; }
+    .news {
+      font-family:"Space Mono",monospace; font-size:12px; font-weight:400; color:var(--muted);
+      background:transparent; border:1px solid transparent; border-radius:7px; padding:5px 9px;
+      cursor:pointer; transition:color .12s,background .12s;
+    }
+    .news:hover { color:var(--accent); background:var(--accent-wash); }
+    .news.open { color:var(--accent); background:var(--accent-wash); font-weight:600; }
+    .news:focus-visible { outline:3px solid var(--accent-wash); outline-offset:1px; }
     .del {
-      font-family: "Space Mono", monospace;
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 7px;
-      padding: 5px 9px;
-      min-width: 32px;
-      line-height: 1;
-      cursor: pointer;
-      transition: color .12s, background .12s, border-color .12s;
+      font-family:"Space Mono",monospace; font-size:13px; font-weight:400; color:var(--muted);
+      background:transparent; border:1px solid transparent; border-radius:7px; padding:5px 9px;
+      min-width:32px; line-height:1; cursor:pointer; transition:color .12s,background .12s,border-color .12s;
     }
-    .del:hover { color: var(--neg); background: #FDECEE; }
-    .del.armed {
-      color: #fff;
-      background: var(--neg);
-      border-color: var(--neg);
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 600;
-      font-size: 12px;
-      padding: 5px 12px;
-    }
-    .del:focus-visible { outline: 3px solid #F6CDD2; outline-offset: 1px; }
-    .del:disabled { opacity: .55; cursor: default; }
+    .del:hover { color:var(--neg); background:#FDECEE; }
+    .del.armed { color:#fff; background:var(--neg); border-color:var(--neg); font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:12px; padding:5px 12px; }
+    .del:focus-visible { outline:3px solid #F6CDD2; outline-offset:1px; }
+    .del:disabled { opacity:.55; cursor:default; }
 
-    .empty { padding: 44px 20px; text-align: center; color: var(--muted); }
-    .empty .mark {
-      font-family: "Space Mono", monospace;
-      font-size: 22px;
-      color: #C3CAD6;
-      letter-spacing: .1em;
-      margin-bottom: 8px;
+    /* News panel */
+    tr.news-row td { padding:0; background:#FBFCFD; border-top:none; }
+    .news-panel { padding:4px 20px 18px; }
+    .news-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:13px; }
+    .news-list li { padding-left:14px; border-left:2px solid var(--line); }
+    .news-title a { color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:500; line-height:1.35; }
+    .news-title a:hover { color:var(--accent); text-decoration:underline; }
+    .news-title span { color:var(--ink); font-size:13.5px; font-weight:500; }
+    .news-meta { font-family:"Space Mono",monospace; font-size:11px; color:var(--muted); margin-top:3px; }
+    .news-loading, .news-empty { font-family:"Space Mono",monospace; font-size:12.5px; color:var(--muted); padding:8px 0; }
+    .news-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+    .news-desc { font-size:12.5px; color:#55607A; margin-top:5px; line-height:1.5; }
+    .senti {
+      flex-shrink:0; font-family:"Space Mono",monospace; font-size:10px; letter-spacing:.08em;
+      text-transform:uppercase; padding:3px 7px; border-radius:6px; font-weight:700; margin-top:1px; white-space:nowrap;
     }
-    .empty p { margin: 0; font-size: 13.5px; }
+    .senti.pos { background:#E7F6EF; color:#0B6B4A; }
+    .senti.neg { background:#FDECEE; color:#A61B2B; }
+    .senti.neu { background:#EEF0F3; color:#5A6474; }
 
-    @media (max-width: 520px) {
-      body { padding-top: 32px; }
-      h1 { font-size: 25px; }
-      .field { flex-direction: column; }
-      .add button { width: 100%; }
-      thead { display: none; }
-      tbody tr { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; padding: 14px 18px; align-items: center; }
-      tbody tr::before { display: none; }
-      tbody td { padding: 0; border: none; }
-      td.sym-cell { grid-column: 1; grid-row: 1; }
-      td.price { grid-column: 2; grid-row: 1; }
-      td.act { grid-column: 3; grid-row: 1; }
-      td.email { grid-column: 1 / -1; grid-row: 2; }
-      td.updated { grid-column: 1 / -1; grid-row: 3; text-align: left; }
-    }
+    .empty { padding:44px 20px; text-align:center; color:var(--muted); }
+    .empty .mark { font-family:"Space Mono",monospace; font-size:22px; color:#C3CAD6; letter-spacing:.1em; margin-bottom:8px; }
+    .empty p { margin:0; font-size:13.5px; }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before { animation: none !important; transition: none !important; }
+    @media (max-width:520px) {
+      body { padding-top:32px; }
+      h1 { font-size:25px; }
+      .field { flex-direction:column; }
+      .add button { width:100%; }
+      thead { display:none; }
+      tbody tr.quote { display:grid; grid-template-columns:auto 1fr auto; gap:4px 12px; padding:14px 18px; align-items:center; }
+      tbody tr.quote::before { display:none; }
+      tbody tr.quote td { padding:0; border:none; }
+      td.sym-cell { grid-column:1; grid-row:1; }
+      td.price { grid-column:2; grid-row:1; }
+      td.act { grid-column:3; grid-row:1; }
+      td.email { grid-column:1 / -1; grid-row:2; }
+      td.updated { grid-column:1 / -1; grid-row:3; text-align:left; }
     }
+    @media (prefers-reduced-motion:reduce) { *,*::before { animation:none !important; transition:none !important; } }
   </style>
 </head>
 <body>
@@ -356,35 +228,56 @@
       resultEl.textContent = text;
       resultEl.className = "show " + (kind || "");
     }
+    function escapeHtml(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
 
     function disarmRows() {
-      watchlistBody.querySelectorAll(".del.armed").forEach((b) => {
-        b.classList.remove("armed");
-        b.textContent = "\u2715";
-      });
+      watchlistBody.querySelectorAll(".del.armed").forEach((b) => { b.classList.remove("armed"); b.textContent = "\u2715"; });
     }
     function disarmClear() {
-      if (clearBtn.classList.contains("armed")) {
-        clearBtn.classList.remove("armed");
-        clearBtn.textContent = "Clear all";
-      }
+      if (clearBtn.classList.contains("armed")) { clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all"; }
     }
     function disarmAll() { disarmRows(); disarmClear(); }
+
+    function sentimentTag(s) {
+      if (!s) return "";
+      const k = String(s).toLowerCase();
+      const cls = k === "positive" ? "pos" : k === "negative" ? "neg" : "neu";
+      return '<span class="senti ' + cls + '">' + escapeHtml(k) + "</span>";
+    }
+
+    function renderNews(articles) {
+      if (!articles || !articles.length) return '<div class="news-empty">No recent news for this ticker.</div>';
+      const items = articles.map((a) => {
+        const dt = a.published_utc ? new Date(a.published_utc).toLocaleDateString() : "";
+        const meta = [a.publisher, dt].filter(Boolean).map(escapeHtml).join(" \u00b7 ");
+        const safeUrl = a.url && /^https?:\/\//i.test(a.url) ? a.url : null;
+        const title = escapeHtml(a.title || "Untitled");
+        const titleHtml = safeUrl
+          ? '<a href="' + escapeHtml(safeUrl) + '" target="_blank" rel="noopener noreferrer">' + title + "</a>"
+          : "<span>" + title + "</span>";
+        return "<li>" +
+          '<div class="news-head"><div class="news-title">' + titleHtml + "</div>" + sentimentTag(a.sentiment) + "</div>" +
+          (a.description ? '<div class="news-desc">' + escapeHtml(a.description) + "</div>" : "") +
+          (meta ? '<div class="news-meta">' + meta + "</div>" : "") +
+          "</li>";
+      }).join("");
+      return '<ul class="news-list">' + items + "</ul>";
+    }
 
     async function loadWatchlist() {
       try {
         const resp = await fetch("/watchlist");
         const data = await resp.json();
-        if (!resp.ok) {
-          setResult("Error loading watchlist: " + (data.error || resp.statusText), "err");
-          return;
-        }
+        if (!resp.ok) { setResult("Error loading watchlist: " + (data.error || resp.statusText), "err"); return; }
         watchlistBody.innerHTML = "";
         data.forEach((row) => {
           const tr = document.createElement("tr");
-          const price = row.latest_price !== null && row.latest_price !== undefined
-            ? Number(row.latest_price).toFixed(2)
-            : "-";
+          tr.className = "quote";
+          const price = row.latest_price !== null && row.latest_price !== undefined ? Number(row.latest_price).toFixed(2) : "-";
           const priceCell = price === "-" ? "-" : '<span class="cur">$</span>' + price;
           const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
           tr.innerHTML =
@@ -392,8 +285,10 @@
             '<td class="email">' + (row.email || "-") + '</td>' +
             '<td class="price">' + priceCell + '</td>' +
             '<td class="updated">' + updated + '</td>' +
-            '<td class="act"><button type="button" class="del" data-symbol="' + row.symbol +
-            '" aria-label="Remove ' + row.symbol + ' from watchlist">\u2715</button></td>';
+            '<td class="act"><div class="act-group">' +
+              '<button type="button" class="news" data-symbol="' + row.symbol + '" aria-label="Show news for ' + row.symbol + '">News</button>' +
+              '<button type="button" class="del" data-symbol="' + row.symbol + '" aria-label="Remove ' + row.symbol + ' from watchlist">\u2715</button>' +
+            '</div></td>';
           watchlistBody.appendChild(tr);
         });
         const n = data.length;
@@ -413,43 +308,66 @@
       setResult("Fetching latest price for " + symbol.toUpperCase() + "\u2026", "pending");
       try {
         const resp = await fetch("/watchlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbol }),
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ symbol }),
         });
         const data = await resp.json();
-        if (!resp.ok) {
-          setResult("Error: " + (data.error || resp.statusText), "err");
-          return;
-        }
+        if (!resp.ok) { setResult("Error: " + (data.error || resp.statusText), "err"); return; }
         setResult("Added " + data.symbol + " at $" + Number(data.latest_price).toFixed(2), "ok");
         document.getElementById("symbol").value = "";
         loadWatchlist();
-      } catch (err) {
-        setResult("Request failed: " + err, "err");
-      }
+      } catch (err) { setResult("Request failed: " + err, "err"); }
     });
 
-    // Delete one (two-step arm/confirm)
+    // Row-level actions: news (toggle panel) + delete (arm/confirm)
     watchlistBody.addEventListener("click", async (e) => {
+      // ---- News ----
+      const newsBtn = e.target.closest(".news");
+      if (newsBtn) {
+        const tr = newsBtn.closest("tr");
+        const symbol = newsBtn.dataset.symbol;
+        const next = tr.nextElementSibling;
+        // collapse if already open
+        if (next && next.classList.contains("news-row")) {
+          next.remove(); newsBtn.classList.remove("open"); newsBtn.textContent = "News"; return;
+        }
+        // close any other open panel
+        watchlistBody.querySelectorAll("tr.news-row").forEach((r) => r.remove());
+        watchlistBody.querySelectorAll(".news.open").forEach((b) => { b.classList.remove("open"); b.textContent = "News"; });
+        // open loading panel
+        const detail = document.createElement("tr");
+        detail.className = "news-row";
+        detail.innerHTML = '<td colspan="5"><div class="news-panel"><div class="news-loading">Fetching news for ' + escapeHtml(symbol) + "\u2026</div></div></td>";
+        tr.after(detail);
+        newsBtn.classList.add("open"); newsBtn.textContent = "Hide";
+        try {
+          const resp = await fetch("/news/" + encodeURIComponent(symbol));
+          const data = await resp.json();
+          const panel = detail.querySelector(".news-panel");
+          if (!panel) return;
+          panel.innerHTML = resp.ok
+            ? renderNews(data.articles || [])
+            : '<div class="news-empty">' + escapeHtml(data.error || resp.statusText) + "</div>";
+        } catch (err) {
+          const panel = detail.querySelector(".news-panel");
+          if (panel) panel.innerHTML = '<div class="news-empty">Failed to load news: ' + escapeHtml(String(err)) + "</div>";
+        }
+        return;
+      }
+
+      // ---- Delete one ----
       const btn = e.target.closest(".del");
       if (!btn) return;
       if (!btn.classList.contains("armed")) {
-        disarmAll();
-        btn.classList.add("armed");
-        btn.textContent = "Remove";
-        return;
+        disarmAll(); btn.classList.add("armed"); btn.textContent = "Remove"; return;
       }
       const symbol = btn.dataset.symbol;
-      btn.disabled = true;
-      btn.textContent = "\u2026";
+      btn.disabled = true; btn.textContent = "\u2026";
       try {
         const resp = await fetch("/watchlist/" + encodeURIComponent(symbol), { method: "DELETE" });
         const data = await resp.json();
         if (!resp.ok) {
           setResult("Error: " + (data.error || resp.statusText), "err");
-          btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "\u2715";
-          return;
+          btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "\u2715"; return;
         }
         setResult("Removed " + symbol + " from your watchlist", "ok");
         loadWatchlist();
@@ -459,30 +377,21 @@
       }
     });
 
-    // Clear all (two-step arm/confirm)
+    // Clear all (arm/confirm)
     clearBtn.addEventListener("click", async () => {
       if (!clearBtn.classList.contains("armed")) {
-        disarmRows();
-        clearBtn.classList.add("armed");
-        clearBtn.textContent = "Confirm clear all";
-        return;
+        disarmRows(); clearBtn.classList.add("armed"); clearBtn.textContent = "Confirm clear all"; return;
       }
-      clearBtn.disabled = true;
-      clearBtn.textContent = "Clearing\u2026";
+      clearBtn.disabled = true; clearBtn.textContent = "Clearing\u2026";
       try {
         const resp = await fetch("/watchlist", { method: "DELETE" });
         const data = await resp.json();
         if (!resp.ok) {
           setResult("Error: " + (data.error || resp.statusText), "err");
-          clearBtn.disabled = false; clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all";
-          return;
+          clearBtn.disabled = false; clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all"; return;
         }
         const n = data.deleted || 0;
-        setResult(
-          n ? ("Cleared " + n + (n === 1 ? " ticker" : " tickers") + " from your watchlist")
-            : "Watchlist already empty",
-          "ok"
-        );
+        setResult(n ? ("Cleared " + n + (n === 1 ? " ticker" : " tickers") + " from your watchlist") : "Watchlist already empty", "ok");
         clearBtn.disabled = false; clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all";
         loadWatchlist();
       } catch (err) {
@@ -491,7 +400,6 @@
       }
     });
 
-    // Clicking anywhere else cancels any pending confirm
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".del") && !e.target.closest("#clear-all")) disarmAll();
     });
