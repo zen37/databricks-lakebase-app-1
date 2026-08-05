@@ -326,6 +326,27 @@ def _news_sentiment(insights, symbol):
     return None
 
 
+def _extract_price_time(data):
+    """Timestamp of the price, matching the source _extract_latest_price used."""
+    if not isinstance(data, dict):
+        return None
+    t = data.get("ticker")
+    if isinstance(t, dict):
+        last = t.get("lastTrade")
+        if isinstance(last, dict) and last.get("t"):
+            return _epoch_to_dt(last["t"])
+        mn = t.get("min")
+        if isinstance(mn, dict) and mn.get("t"):
+            return _epoch_to_dt(mn["t"])
+        if t.get("updated"):
+            return _epoch_to_dt(t["updated"])
+        return None
+    results = data.get("results")
+    if isinstance(results, list) and results and isinstance(results[0], dict):
+        return _epoch_to_dt(results[0].get("t"))
+    return None
+
+
 def _epoch_to_dt(value):
     """Normalize an epoch in s / ms / ns to a UTC datetime."""
     try:
