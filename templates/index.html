@@ -122,11 +122,12 @@
     .news.open { color:var(--accent); background:var(--accent-wash); font-weight:600; }
     .news:focus-visible { outline:3px solid var(--accent-wash); outline-offset:1px; }
     .del {
-      font-family:"Space Mono",monospace; font-size:13px; font-weight:400; color:var(--muted);
-      background:transparent; border:1px solid transparent; border-radius:7px; padding:5px 9px;
-      min-width:32px; line-height:1; cursor:pointer; transition:color .12s,background .12s,border-color .12s;
+      font-family:"Space Mono",monospace; font-size:11px; font-weight:400; letter-spacing:.06em;
+      text-transform:uppercase; color:var(--neg); background:transparent; border:1px solid #F1C6CC;
+      border-radius:7px; padding:5px 11px; line-height:1; cursor:pointer;
+      transition:color .12s,background .12s,border-color .12s;
     }
-    .del:hover { color:var(--neg); background:#FDECEE; }
+    .del:hover { color:#fff; background:var(--neg); border-color:var(--neg); }
     .del.armed { color:#fff; background:var(--neg); border-color:var(--neg); font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:12px; padding:5px 12px; }
     .del:focus-visible { outline:3px solid #F6CDD2; outline-offset:1px; }
     .del:disabled { opacity:.55; cursor:default; }
@@ -235,7 +236,7 @@
     }
 
     function disarmRows() {
-      watchlistBody.querySelectorAll(".del.armed").forEach((b) => { b.classList.remove("armed"); b.textContent = "\u2715"; });
+      watchlistBody.querySelectorAll(".del.armed").forEach((b) => { b.classList.remove("armed"); b.textContent = "Remove"; });
     }
     function disarmClear() {
       if (clearBtn.classList.contains("armed")) { clearBtn.classList.remove("armed"); clearBtn.textContent = "Clear all"; }
@@ -287,7 +288,7 @@
             '<td class="updated">' + updated + '</td>' +
             '<td class="act"><div class="act-group">' +
               '<button type="button" class="news" data-symbol="' + row.symbol + '" aria-label="Show news for ' + row.symbol + '">News</button>' +
-              '<button type="button" class="del" data-symbol="' + row.symbol + '" aria-label="Remove ' + row.symbol + ' from watchlist">\u2715</button>' +
+              '<button type="button" class="del" data-symbol="' + row.symbol + '" aria-label="Remove ' + row.symbol + ' from watchlist">Remove</button>' +
             '</div></td>';
           watchlistBody.appendChild(tr);
         });
@@ -358,7 +359,7 @@
       const btn = e.target.closest(".del");
       if (!btn) return;
       if (!btn.classList.contains("armed")) {
-        disarmAll(); btn.classList.add("armed"); btn.textContent = "Remove"; return;
+        disarmAll(); btn.classList.add("armed"); btn.textContent = "Confirm"; return;
       }
       const symbol = btn.dataset.symbol;
       btn.disabled = true; btn.textContent = "\u2026";
@@ -367,13 +368,13 @@
         const data = await resp.json();
         if (!resp.ok) {
           setResult("Error: " + (data.error || resp.statusText), "err");
-          btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "\u2715"; return;
+          btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "Remove"; return;
         }
         setResult("Removed " + symbol + " from your watchlist", "ok");
         loadWatchlist();
       } catch (err) {
         setResult("Request failed: " + err, "err");
-        btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "\u2715";
+        btn.disabled = false; btn.classList.remove("armed"); btn.textContent = "Remove";
       }
     });
 
